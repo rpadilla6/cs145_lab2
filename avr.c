@@ -19,23 +19,35 @@ avr_wait(unsigned short msec)
 	TCCR0 = 0;
 }
 
-int main(){
+int main(void){
 	avr_init();	
-	
+	SET_BIT(DDRB, 0);
+	for(;;){
+		int key = get_key();
+		blink(key);
+	}
+}
+
+void blink(int num){
+	int i;
+	for(i=0;i<num;i++){
+		SET_BIT(PORTB, 0);
+		avr_wait(500);
+		CLR_BIT(PORTB, 0);
+		avr_wait(500);
+	}
 }
 
 int is_pressed(int row, int col){
 	//set all rows, cols to n/c
-	DDRC=0x00;
+	DDRC=0xF0;
+	PORTC=0x0F;
 	//set col to strong 0
-	CLR_BIT(PORTC, col);
+	CLR_BIT(DDRC, col+4);
 	//set row to weak 1
 	SET_BIT(PORTC, row);
-	
-	if(GET_BIT(PINC, row)){
-		return 0;
-	}
-	return 1;
+	avr_wait(1);
+	return !GET_BIT(PINC, row);
 }
 int get_key(){
 	int r,c;
