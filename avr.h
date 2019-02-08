@@ -9,7 +9,7 @@
 
 #define SET_BIT(p,i) ((p) |=  (1 << (i)))
 #define CLR_BIT(p,i) ((p) &= ~(1 << (i)))
-#define GET_BIT(p,i) ((p) &   (1 << (i)))
+#define GET_BIT(p,i) ((p) &   (1 << (i)))+
 
 #define WDR() asm volatile("wdr"::)
 #define NOP() asm volatile("nop"::)
@@ -18,5 +18,8 @@
 void avr_init(void);
 
 void avr_wait(unsigned short msec);
+void get_key();
+
+int is_pressed(int, int);
 
 #endif /* _AVR_H */
