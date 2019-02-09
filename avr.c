@@ -40,10 +40,10 @@ void blink(int num){
 
 int is_pressed(int row, int col){
 	//set all rows, cols to n/c
-	DDRC=0xF0;
-	PORTC=0x0F;
+	DDRC=0;
+	PORTC=0;
 	//set col to strong 0
-	CLR_BIT(DDRC, col+4);
+	SET_BIT(DDRC, col+4);
 	//set row to weak 1
 	SET_BIT(PORTC, row);
 	avr_wait(1);
