@@ -99,7 +99,7 @@ lcd_put(char c)
 {
 	write(c, 1);
 }
-
+/*
 void
 lcd_puts1(const char *s)
 {
@@ -108,7 +108,7 @@ lcd_puts1(const char *s)
 		write(c, 1);
 	}
 }
-
+*/
 void
 lcd_puts2(const char *s)
 {
