@@ -1,4 +1,5 @@
 #include "avr.h"
+#include "lcd.h"
 
 void
 avr_init(void)
@@ -21,11 +22,11 @@ avr_wait(unsigned short msec)
 
 int main(void){
 	avr_init();	
-	SET_BIT(DDRB, 0);
-	for(;;){
-		int key = get_key();
-		blink(key);
-	}
+	lcd_init();
+	lcd_pos(1,1);
+	lcd_puts2("Hello world!");
+	avr_wait(1000);
+	while(1);
 }
 
 void blink(int num){

@@ -9,7 +9,7 @@ void lcd_pos(unsigned char r, unsigned char c);
 
 void lcd_put(char c);
 
-void lcd_puts1(const char *s);
+//void lcd_puts1(const char *s);
 
 void lcd_puts2(const char *s);
 
