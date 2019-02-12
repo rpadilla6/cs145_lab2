@@ -19,8 +19,10 @@ void avr_init(void);
 
 void avr_wait(unsigned short msec);
 int get_key();
+int get_num();
 
 int is_pressed(int, int);
 void blink(int);
+void set_time(void);
 
 #endif /* _AVR_H */

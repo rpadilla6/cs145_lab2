@@ -1,4 +1,6 @@
 #include "avr.h"
+#include <stdio.h>
+#include <string.h>
 #include "lcd.h"
 
 void
@@ -19,14 +21,70 @@ avr_wait(unsigned short msec)
 	}
 	TCCR0 = 0;
 }
+char str[25];
+char out[25];
+int total;
+char day;
+char month;
+short year;
+char hour;
+char minute;
+char second;
 
 int main(void){
 	avr_init();	
 	lcd_init();
-	lcd_pos(1,1);
-	lcd_puts2("Hello world!");
-	avr_wait(1000);
-	while(1);
+	lcd_pos(0,1);
+	for(;;){
+		int key = get_key();
+		switch(key){
+			case 4:
+				set_time();
+				break;
+			case 8:
+				// Toggle 12hr/24hr
+				break;
+			default:
+				break;
+		}
+		/*
+		if(key){
+			sprintf(str, "%d", key);
+			lcd_puts2(str);
+			avr_wait(200);
+		}
+		*/
+	}
+}
+
+void set_time(void){
+	strcpy(str, "Enter day: ");
+	lcd_puts2(str);
+	day = get_num();
+	lcd_clr();
+	lcd_pos(0,1);
+	strcpy(str, "Enter month: ");
+	month = get_num();
+	lcd_clr();
+	lcd_pos(0,1);
+	strcpy(str, "Enter year: ");
+	year = get_num();
+}
+
+int get_num(void){
+	char num = 0;
+	for(;;){
+		int key = get_key();
+		switch(key){
+			case 16:
+				return num;
+			case 4 || 8 || 12 || 13 || 15: // do nothing in this case
+				break;
+			default:
+				num = (num * 10) + key;
+				break;
+		}
+	}
 }
 
 void blink(int num){
