@@ -20,9 +20,22 @@ void avr_init(void);
 void avr_wait(unsigned short msec);
 int get_key();
 int get_num();
-
+struct datetime{
+	short year;
+	char month;
+	char day;
+	char hour;
+	char minute;
+	char second;
+	char subsecond;
+	char military;
+};
+void keep_time(struct datetime *);
+void keep_date(struct datetime *);
 int is_pressed(int, int);
 void blink(int);
-void set_time(void);
+void set_time(struct datetime *);
+void set_date(struct datetime *);
+void display_time(struct datetime *);
 
 #endif /* _AVR_H */
