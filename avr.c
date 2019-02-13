@@ -23,58 +23,66 @@ avr_wait(unsigned short msec)
 }
 char str[17];
 char out[17];
-int total;
+
 
 int main(void){
+	// Initialize everything
 	avr_init();	
 	lcd_init();
-	struct datetime dt = {2019, 2, 11, 9, 12, 15, 16};
+	struct datetime dt = {2019, 2, 11, 19, 12, 5, 16, 0};
 	display_time(&dt);
 	for(;;){
-		avr_wait(10);
+		//Main loop will check if key pressed, and if it is A or B, do something
+		avr_wait(85);
 		keep_time(&dt);
 		display_time(&dt);
 		int key = get_key();
 		switch(key){
+			// Set date and time
 			case 4:
 				set_date(&dt);
 				set_time(&dt);
 				break;
+			// Toggle military time
 			case 8:
-				// Toggle 12hr/24hr
+				dt.military = dt.military^1;
+				avr_wait(150);
 				break;
 			default:
 				break;
 		}
-		/*
-		if(key){
-			sprintf(str, "%d", key);
-			lcd_puts2(str);
-			avr_wait(200);
-		}
-		*/
 	}
 }
-
+// Display the time to lcd
 void display_time(struct datetime *dt){
 	sprintf(out, "%d/%d/%d", dt->month, dt->day, dt->year);
 	lcd_clr();
 	lcd_pos(0,1);
 	lcd_puts2(out);
 	lcd_pos(1,1);
-	sprintf(out, "%d:%d:%d:%d", dt->hour, dt->minute, dt->second, dt->subsecond);
+	// If military time, display without special formatting (default)
+	if(dt->military){
+		sprintf(out, "%02d:%02d:%02d:%d", dt->hour, dt->minute, dt->second, dt->subsecond);
+	}
+	else{
+		// Otherwise some special cases are in play for AM/PM
+		if(dt->hour > 12){
+			sprintf(out, "%02d:%02d:%02d:%d %s", (dt->hour - 12), dt->minute, dt->second, dt->subsecond, "PM");
+		}
+		else if(dt->hour == 0){
+			sprintf(out, "%02d:%02d:%02d:%02d %s", (dt->hour + 12), dt->minute, dt->second, dt->subsecond, "AM");
+		}
+		else{
+			sprintf(out, "%02d:%02d:%02d:%d %s", dt->hour, dt->minute, dt->second, dt->subsecond, "AM");
+		}
+	}
 	lcd_puts2(out);
 }
 
+/************************************************************************/
+/* Prompt user to enter in first minute, then hour.                     */
+/************************************************************************/
 void set_time(struct datetime *dt){
-	/*
-	lcd_clr();
-	lcd_pos(0,1);
-	strcpy(str, "24 hr?: ");
-	dt->military = get_num();
-	avr_wait(200);
-	*/
-	
 	lcd_clr();
 	lcd_pos(0,1);
 	strcpy(str, "Minute: ");
@@ -91,7 +99,9 @@ void set_time(struct datetime *dt){
 	dt->second = 0;
 	dt->subsecond = 0;
 }
-
+/************************************************************************/
+/* Prompt user to enter in first day, then month, then year             */
+/************************************************************************/
 void set_date(struct datetime *dt){
 	lcd_clr();
 	lcd_pos(0,1);
@@ -114,12 +124,15 @@ void set_date(struct datetime *dt){
 	dt->year = get_num();
 	avr_wait(200);
 }
-
+/************************************************************************/
+/* Gets actual keypad value (numbers 0-9)                               */
+/************************************************************************/
 int get_num(void){
 	int num = 0;
 	for(;;){
 		int key = get_key();
 		switch(key){
+			// # is enter key
 			case 15:
 				return num;
 			case 0:
@@ -141,6 +154,9 @@ int get_num(void){
 	}
 }
 
+/************************************************************************/
+/* Runs within main loop to keep time                                   */
+/************************************************************************/
 void keep_time(struct datetime *date){
 	if(++(date->subsecond) > 9){
 		date->subsecond = 0;
@@ -156,7 +172,9 @@ void keep_time(struct datetime *date){
 		}
 	}
 }
-
+/************************************************************************/
+/* Called by keep time function                                         */
+/************************************************************************/
 void keep_date(struct datetime *date){
 	date->day++;
 	char extra = 0;
@@ -189,16 +207,9 @@ void keep_date(struct datetime *date){
 	}
 }
 
-void blink(int num){
-	int i;
-	for(i=0;i<num;i++){
-		SET_BIT(PORTB, 0);
-		avr_wait(500);
-		CLR_BIT(PORTB, 0);
-		avr_wait(500);
-	}
-}
-
+/************************************************************************/
+/* Check for if a certain button is pressed                             */
+/************************************************************************/
 int is_pressed(int row, int col){
 	//set all rows, cols to n/c
 	DDRC=0;
@@ -211,6 +222,10 @@ int is_pressed(int row, int col){
 	return !GET_BIT(PINC, row);
 }
 
+/************************************************************************/
+/* Get raw key pressed, different than get_num which does some conversion*/
+/* for keypad numbers                                                   */
+/************************************************************************/
 int get_key(){
 	int r,c;
 	for(r=0;r<4;++r){
